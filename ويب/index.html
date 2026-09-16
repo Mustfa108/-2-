@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام إدارة المهام والمشاريع — الخوارزميات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">خ</div>
+    <div>
+      <h1>إدارة المهام والمشاريع</h1>
+      <span class="sub">مادة تحليل وتصميم الخوارزميات — المشروع التكاملي 2026</span>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-view="kanban">لوحة كانبان</button>
+    <button class="tab" data-view="tasks">المهام والهرمية</button>
+    <button class="tab" data-view="sorting">خوارزميات الترتيب</button>
+    <button class="tab" data-view="effort">فرّق تسد — الجهد</button>
+    <button class="tab" data-view="report">التقرير</button>
+    <button class="tab" data-view="log">السجل الزمني</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ==================== كانبان ==================== -->
+  <section id="view-kanban" class="view active">
+    <div class="section-head">
+      <h2>لوحة الحالات (Kanban)</h2>
+      <button class="btn primary" onclick="UI.showTaskForm(-1)">+ مهمة جديدة</button>
+    </div>
+    <div class="kanban">
+      <div class="kcol" id="col-NEW">
+        <div class="khead"><span class="dot d-new"></span> جديد <span class="badge" id="cnt-NEW">0</span></div>
+        <div class="kbody" data-status="NEW"></div>
+      </div>
+      <div class="kcol" id="col-IN_PROGRESS">
+        <div class="khead"><span class="dot d-prog"></span> قيد العمل <span class="badge" id="cnt-IN_PROGRESS">0</span></div>
+        <div class="kbody" data-status="IN_PROGRESS"></div>
+      </div>
+      <div class="kcol" id="col-DONE">
+        <div class="khead"><span class="dot d-done"></span> منتهي <span class="badge" id="cnt-DONE">0</span></div>
+        <div class="kbody" data-status="DONE"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== المهام ==================== -->
+  <section id="view-tasks" class="view">
+    <div class="section-head">
+      <h2>المهام والتسلسل الهرمي</h2>
+      <button class="btn primary" onclick="UI.showTaskForm(-1)">+ إضافة مهمة</button>
+    </div>
+    <div id="taskTree" class="tree-wrap"></div>
+  </section>
+
+  <!-- ==================== الترتيب ==================== -->
+  <section id="view-sorting" class="view">
+    <div class="section-head"><h2>خوارزميات الترتيب بالمقارنة</h2></div>
+    <p class="hint">ترتيب المهام إما حسب <b>الأولوية</b> (الأعلى أولاً) أو حسب <b>التاريخ المتبقي</b> (الأقرب أولاً) — باستخدام تنفيذ يدوي لخوارزميتين ومقارنة زمن التنفيذ الفعلي بالمللي ثانية.</p>
+    <div class="card sort-controls">
+      <label>ترتيب حسب:
+        <select id="sortBy">
+          <option value="priority">الأولوية (الأعلى أولاً)</option>
+          <option value="due">تاريخ التسليم (الأقرب أولاً)</option>
+        </select>
+      </label>
+      <button class="btn primary" onclick="UI.runSort()">ترتيب الآن</button>
+    </div>
+    <div class="sort-grid" id="sortResults">
+      <div class="card algo-card quick"><h3>Quick Sort</h3><div class="stat"><span id="qMs" class="big">—</span><small>مللي ثانية</small></div><div class="stat2" id="qCmp">—</div><ol id="qList" class="sortlist"></ol></div>
+      <div class="card algo-card merge"><h3>Merge Sort</h3><div class="stat"><span id="mMs" class="big">—</span><small>مللي ثانية</small></div><div class="stat2" id="mCmp">—</div><ol id="mList" class="sortlist"></ol></div>
+    </div>
+    <div class="card analysis">
+      <h3>تحليل التعقيد</h3>
+      <table>
+        <tr><th>الخوارزمية</th><th>أفضل حالة</th><th>أوسط حالة</th><th>أسوأ حالة</th></tr>
+        <tr><td>Quick Sort</td><td>O(n log n)</td><td>O(n log n)</td><td class="bad">O(n²)</td></tr>
+        <tr><td>Merge Sort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n log n)</td></tr>
+      </table>
+      <p>يعاني Quick Sort في أسوأ الحالات عندما يكون المحور (Pivot) دائماً أصغر أو أكبر عنصر — كما في قائمة مرتبة مسبقاً مع اختيار آخر عنصر كمحور — فتصبح القسمة غير متوازنة (n من المستويات بدلاً من log n). أما Merge Sort فيقسم دائماً نصفين متوازنين، لذا يضمن O(n log n) في كل الحالات.</p>
+    </div>
+  </section>
+
+  <!-- ==================== فرّق تسد ==================== -->
+  <section id="view-effort" class="view">
+    <div class="section-head"><h2>فرّق تسد — حساب الجهد الكلي</h2></div>
+    <p class="hint">دالة <b>تكرارية (Recursive)</b> تستقبل المهمة الجذر، تقسمها إلى مهام رئيسية، ثم مهام فرعية، تحسب جهد كل فرع باستدعاء ذاتي، وتدمج النتائج بجمعها لإظهار إجمالي وقت المشروع.</p>
+    <div class="effort-grid">
+      <div class="card">
+        <h3>إجمالي وقت المشروع</h3>
+        <div class="stat center"><span id="effortTotal" class="huge">—</span><small>ساعة عمل</small></div>
+        <div class="mini-stats">
+          <div><b id="effortNodes">—</b><small>عدد المهام (العقد)</small></div>
+          <div><b id="effortDepth">—</b><small>أقصى عمق للشجرة</small></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>الجهد لكل مهمة رئيسية</h3>
+        <div id="effortRoots" class="roots"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>شجرة الاستدعاءات (Call Tree / Call Stack)</h3>
+      <p class="hint">كل عقدة تُزار مرة واحدة فقط لذا تعقيد الدالة <b>O(n)</b> حيث n عدد المهام، والفضاء O(h) على مكدس الاستدعاءات حيث h عمق الشجرة.</p>
+      <pre id="callTree" class="calltree"></pre>
+    </div>
+  </section>
+
+  <!-- ==================== التقرير ==================== -->
+  <section id="view-report" class="view">
+    <div class="section-head"><h2>التقرير البسيط</h2></div>
+    <div class="report-top">
+      <div class="card progress-card">
+        <h3>نسبة الإنجاز الكلية</h3>
+        <div class="ring" id="ring"><span id="ringPct">—</span></div>
+        <p><b id="reportDone">0</b> من <b id="reportTotal">0</b> مهمة منجزة</p>
+      </div>
+    </div>
+    <div class="card">
+      <h3>المهام المنجزة لكل عضو</h3>
+      <table id="memberTable" class="members-table">
+        <tr><th>العضو</th><th>المهام</th><th>منجزة</th><th>الجهد (ساعات)</th><th>نسبة الإنجاز</th></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ==================== السجل ==================== -->
+  <section id="view-log" class="view">
+    <div class="section-head"><h2>سجل التغييرات (Activity Log)</h2></div>
+    <div class="card"><ul id="logList" class="loglist"></ul></div>
+  </section>
+
+</main>
+
+<!-- نافذة إضافة مهمة -->
+<div class="modal" id="taskModal">
+  <div class="modal-box card">
+    <h3 id="modalTitle">مهمة جديدة</h3>
+    <form id="taskForm" onsubmit="return UI.submitTask(event)">
+      <input type="hidden" id="fParent" value="-1">
+      <label>العنوان <input id="fTitle" required placeholder="عنوان المهمة"></label>
+      <label>الوصف <textarea id="fDesc" rows="2" placeholder="وصف مختصر"></textarea></label>
+      <div class="row2">
+        <label>الأولوية
+          <select id="fPriority">
+            <option value="HIGH">عالية</option>
+            <option value="MEDIUM" selected>متوسطة</option>
+            <option value="LOW">منخفضة</option>
+          </select>
+        </label>
+        <label>تاريخ التسليم <input id="fDue" type="date"></label>
+      </div>
+      <div class="row2">
+        <label>عضو الفريق
+          <select id="fAssignee"></select>
+        </label>
+        <label>الجهد المتوقع (ساعات) <input id="fHours" type="number" min="0" step="0.5" value="4"></label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" onclick="UI.closeModal()">إلغاء</button>
+        <button type="submit" class="btn primary">حفظ</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer class="footer">قيم الخوارزميات المطبقة: الترتيب بالمقارنة (Quick Sort &amp; Merge Sort) + فرّق تسد (Divide &amp; Conquer) — الخوارزميات مكتوبة بلغة Java</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
